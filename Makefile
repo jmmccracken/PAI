@@ -13,3 +13,6 @@ PAI: ccmth ccmsrc
 clean:
 	rm -f PAI ccmth ccmsrc
 	rm -f *~
+	
+check:
+	./test/PAItesting.sh
