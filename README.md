@@ -11,7 +11,7 @@ This code requires C++11. To compile, enter
 
 To check the compile, enter
 
-    make check
+    make test
 
 To run, enter
 
