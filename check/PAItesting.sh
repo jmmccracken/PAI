@@ -24,7 +24,7 @@ else
     echo "  !! FAILED"
 fi
 
-if [ n = 2 ]
+if [ $n = 2 ]
 then
     exit 0
 else
