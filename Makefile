@@ -15,4 +15,4 @@ clean:
 	rm -f *~
 	
 test:
-	./test/PAItesting.sh
+	./check/PAItesting.sh
