@@ -14,5 +14,5 @@ clean:
 	rm -f PAI ccmth ccmsrc
 	rm -f *~
 	
-check:
+test:
 	./test/PAItesting.sh
