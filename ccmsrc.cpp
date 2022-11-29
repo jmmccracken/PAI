@@ -499,7 +499,15 @@ void CCMcorr(double &dPcorrYYX, double dY[],int iY_length, double dX_UsedForShad
                between Y and Y|X
 */
 void CCMcorr2(double &dPcorrYYX, double dY[],int iY_length,double dX_UsedForShadow[],int iX_UsedForShadow_length,double dZ_UsedForShadow[],int iZ_UsedForShadow_length,int iEmbeddingDimension,int iLagTime,int iYEmbeddingDimension,int iYLagTime,double dYestimate[],int iYestimate_length,bool bL2){
-
+    
+//     printf("======CCMcorr2======\n");
+//     printf("iX_UsedForShadow_length: %d\n", iX_UsedForShadow_length);
+//     printf("iEmbeddingDimension: %d\n", iEmbeddingDimension);
+//     printf("iYEmbeddingDimension: %d\n", iYEmbeddingDimension);
+//     printf("iZ_UsedForShadow_length: %d", iZ_UsedForShadow_length);
+//     for(int iShadowStep = 0; iShadowStep <= 10; iShadowStep++ ){
+//         printf("%.4f,",dZ_UsedForShadow[iShadowStep]);
+//     }
     //Check Min
     //if( iEmbeddingDimension < 3){
     //    fprintf(stderr, "Error in CCMCorr(): embedding dimension is %i which is less than 3\n", iEmbeddingDimension);
@@ -525,7 +533,7 @@ void CCMcorr2(double &dPcorrYYX, double dY[],int iY_length,double dX_UsedForShad
 
     //Find calculated shadow manifold dimension
     int iCalShadManDim = iX_UsedForShadow_length-((iEmbeddingDimension-1)*iLagTime);
-
+    //printf("iCalShadManDim: %d\n====", iCalShadManDim);
     //Assign some memory for the shadow manifold
     int iEsum = (iEmbeddingDimension+iYEmbeddingDimension);
     double** dXZShadow;
@@ -538,15 +546,28 @@ void CCMcorr2(double &dPcorrYYX, double dY[],int iY_length,double dX_UsedForShad
     //Create the shadow manifold by creating the delay vectors sequentially
     for(int iShadowStep = 1; iShadowStep <= iCalShadManDim; iShadowStep++ ){
         iTstep4delayvector = iShadowStep+((iEmbeddingDimension-1)*iLagTime);
+        //printf("iTstep4delayvector: %d\n====", iTstep4delayvector);
         for(int iDimStep = 1; iDimStep <= iEmbeddingDimension; iDimStep++ ){
             dXZShadow[iShadowStep-1][iDimStep-1] = dX_UsedForShadow[(iTstep4delayvector-((iDimStep-1)*iLagTime))-1];
         }
-	iYTstep4delayvector = iShadowStep+((iYEmbeddingDimension-1)*iYLagTime);
-        for(int iDimStep = iEmbeddingDimension+1; iDimStep <= iYEmbeddingDimension; iDimStep++ ){
-            dXZShadow[iShadowStep-1][iDimStep-1] = dZ_UsedForShadow[(iYTstep4delayvector-((iDimStep-1)*iYLagTime))-1];
+        
+   
+// 	iYTstep4delayvector = iShadowStep+((iYEmbeddingDimension-1)*iYLagTime);
+//         //printf("iYTstep4delayvector: %d\n====", iYTstep4delayvector);
+//         for(int iDimStep = iEmbeddingDimension+1; iDimStep <= iEmbeddingDimension+ iYEmbeddingDimension; iDimStep++ ){
+//             //printf("iDimStep: %d\n====", iDimStep);
+//             dXZShadow[iShadowStep-1][iDimStep-1] = dZ_UsedForShadow[(iYTstep4delayvector-((iDimStep-1-iEmbeddingDimension)*iYLagTime))-1];
+//         }
+//     }
+          
+
+        //this is the Manifold generator described in the paper (Xt,Xt− ,Xt−2 , . . . ,Xt−(E−1) , Yt).
+        iYTstep4delayvector = iShadowStep+((iYEmbeddingDimension-1)*iYLagTime);
+        for(int iDimStep = iEmbeddingDimension+1; iDimStep <= iEmbeddingDimension+iYEmbeddingDimension; iDimStep++ ){
+            dXZShadow[iShadowStep-1][iDimStep-1] = dZ_UsedForShadow[(iTstep4delayvector-((iDimStep-1-iEmbeddingDimension)*iYLagTime))-1];
         }
     }
-
+    
     //Storage for sorting, calculating, and organizing
     double dDelayVectorOfInterest[iEsum],  //delay vector currently being compared
            dWeights[(iEmbeddingDimension+1)],  //weights to contruct Y estimate
@@ -558,18 +579,21 @@ void CCMcorr2(double &dPcorrYYX, double dY[],int iY_length,double dX_UsedForShad
     int iYStart = (iEmbeddingDimension-1)*iLagTime;
 
     //Loop through all of the delay vectors to find it distance to every other one
+    //printf("====================Manifold========================");
     for(int iDelayVectorN = 1; iDelayVectorN <= iCalShadManDim;iDelayVectorN++ ){
-
+        //printf("[");
         //Populate the temp delay vector
         for(int iCopyStep = 0; iCopyStep < iEsum; iCopyStep++ ){
+            //printf("%.2f,", dXZShadow[iDelayVectorN-1][iCopyStep]);
             dDelayVectorOfInterest[iCopyStep] = dXZShadow[iDelayVectorN-1][iCopyStep];
         }
-
+        //printf("]");
         FindWeightsFromShadow(dWeights,iTstepOfNearestNeighborsTempRow,dDelayVectorOfInterest,dXZShadow,iCalShadManDim,iEmbeddingDimension,iLagTime,iEsum);
 
         //Find Y point estimates from X shadow manifold
         dYEstimateGivenX[iDelayVectorN-1] = 0;
         for( int iWeightStep = 0;iWeightStep < (iEmbeddingDimension+1);iWeightStep++ ){
+            
             dYEstimateGivenX[iDelayVectorN-1] += dWeights[iWeightStep]*dY[(iYStart+iTstepOfNearestNeighborsTempRow[iWeightStep])];
         }
     }
