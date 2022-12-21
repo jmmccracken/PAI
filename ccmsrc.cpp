@@ -533,18 +533,26 @@ void CCMcorr2(double &dPcorrYYX, double dY[],int iY_length,double dX_UsedForShad
     for(int iter = 0;iter < iCalShadManDim;iter++ ){
         dXZShadow[iter] = new double[iEsum];
     }
-    int iTstep4delayvector,iYTstep4delayvector;
-
+    int iTstep4delayvector,iYTstep4delayvector,bar;
+    
     //Create the shadow manifold by creating the delay vectors sequentially
     for(int iShadowStep = 1; iShadowStep <= iCalShadManDim; iShadowStep++ ){
+        bar = 0;
         iTstep4delayvector = iShadowStep+((iEmbeddingDimension-1)*iLagTime);
         for(int iDimStep = 1; iDimStep <= iEmbeddingDimension; iDimStep++ ){
             dXZShadow[iShadowStep-1][iDimStep-1] = dX_UsedForShadow[(iTstep4delayvector-((iDimStep-1)*iLagTime))-1];
+            bar++;
         }
-	iYTstep4delayvector = iShadowStep+((iYEmbeddingDimension-1)*iYLagTime);
-        for(int iDimStep = iEmbeddingDimension+1; iDimStep <= iYEmbeddingDimension; iDimStep++ ){
-            dXZShadow[iShadowStep-1][iDimStep-1] = dZ_UsedForShadow[(iYTstep4delayvector-((iDimStep-1)*iYLagTime))-1];
+	    iYTstep4delayvector = iShadowStep+((iYEmbeddingDimension-1)*iYLagTime);
+        //printf(">> %d, >>, %d, %d, %d, %d, %d, %d\n",iEsum, iTstep4delayvector,iEmbeddingDimension,iLagTime,iYTstep4delayvector,iYEmbeddingDimension,iYLagTime);
+        for(int iDimStep = 1; iDimStep <= iYEmbeddingDimension; iDimStep++ ){
+            dXZShadow[iShadowStep-1][iEmbeddingDimension+iDimStep-1] = dZ_UsedForShadow[(iYTstep4delayvector-((iDimStep-1)*iYLagTime))-1];            
+            bar++;
         }
+        /*for(int foo = 0; foo<bar; foo++){
+            printf("%.2f,",dXZShadow[iShadowStep-1][foo]);
+        }
+        printf("\n");*/
     }
 
     //Storage for sorting, calculating, and organizing
@@ -562,8 +570,10 @@ void CCMcorr2(double &dPcorrYYX, double dY[],int iY_length,double dX_UsedForShad
 
         //Populate the temp delay vector
         for(int iCopyStep = 0; iCopyStep < iEsum; iCopyStep++ ){
+            //printf("%.2f,", dXZShadow[iDelayVectorN-1][iCopyStep]);
             dDelayVectorOfInterest[iCopyStep] = dXZShadow[iDelayVectorN-1][iCopyStep];
         }
+        //printf("\n");
 
         FindWeightsFromShadow(dWeights,iTstepOfNearestNeighborsTempRow,dDelayVectorOfInterest,dXZShadow,iCalShadManDim,iEmbeddingDimension,iLagTime,iEsum);
 
