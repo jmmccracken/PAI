@@ -1,9 +1,13 @@
 Pairwise Asymmetric Interference 
 ===
 
-This code performs the convergent-cross mapping (CCM) and pairwise asymmetric interference (PAI) calculations in "Convergent Cross-Mapping and Pairwise Asymmetric Inference", James M. McCracken and Robert S. Weigel [http://arxiv.org/abs/1407.5696] (doi: [TBD]).
+This code performs the convergent-cross mapping (CCM) and pairwise asymmetric interference (PAI) calculations in "Convergent Cross-Mapping and Pairwise Asymmetric Inference", James M. McCracken and Robert S. Weigel [http://arxiv.org/abs/1407.5696] (doi:10.1103/PhysRevE.90.062903).
 
 The code calculates CCM correlations slightly differently than Sugihara et al., who originally introduced the techniques in "Detecting Causality in Complex Ecosystems" [http://www.sciencemag.org/content/338/6106/496.figures-only].  This code uses the square of the correlation between the estimated time series and the original time series, rather than the unsquared version used by Sugihara et al.  See the above paper for details on the algorithms used in this code.    
+
+> :warning: **This code should be considered a research resource. This repo is not actively maintained.** If you are looking for more modern PAI implementations consider https://github.com/PrinceJavier/causal_ccm (Python) or https://juliadynamics.github.io/CausalityTools.jl/stable/pairwise_asymmetric_inference/ (Julia)
+
+Further discussions and examples of PAI can be found in https://github.com/jmmccracken/ECA.
 
 This code requires C++11. To compile, enter
 
